@@ -4,6 +4,7 @@ const qs = require('querystring')
 const EventEmitter = require('events').EventEmitter
 const request = require('request')
 const crypto = require('crypto')
+const JSONbig = require('json-bigint')
 
 class Bot extends EventEmitter {
   constructor (opts) {
@@ -83,8 +84,9 @@ class Bot extends EventEmitter {
             return res.end(JSON.stringify({status: 'not ok', error: 'Message integrity check failed'}))
           }
         }
-
-        let parsed = JSON.parse(body)
+        let parsed = JSON.parse(body.replace(/("sender"\s*:\s*{\s*"id"\s*:\s*)(\d+)/g, (_, rest, id) => (
+            rest + '"' + id + '"'
+        )))
         this._handleMessage(parsed)
 
         res.end(JSON.stringify({status: 'ok'}))
